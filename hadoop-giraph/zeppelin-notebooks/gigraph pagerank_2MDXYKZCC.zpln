@@ -1,0 +1,122 @@
+{
+  "paragraphs": [
+    {
+      "text": "%spark.pyspark\r\n# 1. Lecture du fichier résultat depuis HDFS\r\n# Giraph produit un fichier texte simple : ID [TAB] SCORE\r\n# Nous utilisons le lecteur CSV de Spark en spécifiant le délimiteur tabulation\r\ndf \u003d spark.read.option(\"delimiter\", \"\\t\") \\\r\n          .option(\"inferSchema\", \"true\") \\\r\n          .csv(\"hdfs://namenode:9000/output/pagerank/part-m-00000\") \\\r\n          .toDF(\"Node_ID\", \"PageRank_Score\")\r\n\r\n# 2. Conversion des types pour s\u0027assurer que le tri fonctionne\r\nfrom pyspark.sql.types import DoubleType\r\ndf_clean \u003d df.withColumn(\"PageRank_Score\", df[\"PageRank_Score\"].cast(DoubleType()))\r\n\r\n# 3. Affichage des 10 nœuds les plus influents (Score le plus élevé)\r\n# La fonction z.show active la visualisation automatique de Zeppelin\r\ntop_nodes \u003d df_clean.orderBy(df_clean[\"PageRank_Score\"].desc()).limit(20)\r\nz.show(top_nodes)",
+      "user": "anonymous",
+      "dateUpdated": "2025-12-13 18:11:56.734",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "Node_ID": "string",
+                      "PageRank_Score": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "Node_ID\tPageRank_Score\n4037\t0.0019237980659206006\n15\t0.0015365852670269071\n6634\t0.0014977457639700944\n2625\t0.0013711423184348645\n2398\t0.0010892766960396523\n2470\t0.001053840885271126\n2237\t0.0010425059798873995\n4191\t9.469772290971885E-4\n7553\t9.060051388331622E-4\n5254\t8.978083798029384E-4\n2328\t8.515250807271886E-4\n1186\t8.499695042719647E-4\n1297\t8.125164600667993E-4\n4335\t8.087255898510784E-4\n7620\t8.067706549107947E-4\n5412\t8.012733799279638E-4\n7632\t7.966078306762117E-4\n4875\t7.824403137419468E-4\n6946\t7.55135009980072E-4\n3352\t7.449190455177323E-4\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://0fe28d283515:4040/jobs/job?id\u003d0"
+            },
+            {
+              "jobUrl": "http://0fe28d283515:4040/jobs/job?id\u003d1"
+            },
+            {
+              "jobUrl": "http://0fe28d283515:4040/jobs/job?id\u003d2"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1765647448752_389085630",
+      "id": "paragraph_1765647448752_389085630",
+      "dateCreated": "2025-12-13 17:37:28.752",
+      "dateStarted": "2025-12-13 18:11:32.364",
+      "dateFinished": "2025-12-13 18:11:56.539",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%spark.pyspark\n",
+      "user": "anonymous",
+      "dateUpdated": "2025-12-13 17:38:00.121",
+      "progress": 0,
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1765647480121_295810303",
+      "id": "paragraph_1765647480121_295810303",
+      "dateCreated": "2025-12-13 17:38:00.121",
+      "status": "READY"
+    }
+  ],
+  "name": "gigraph pagerank",
+  "id": "2MDXYKZCC",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.10.1",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false
+  },
+  "info": {}
+}

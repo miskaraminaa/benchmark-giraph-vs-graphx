@@ -1,0 +1,98 @@
+services:
+  # --- 1. Neo4j ---
+  neo4j:
+    image: neo4j:5.12.0
+    container_name: mon-neo4j
+    hostname: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/projet1234
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+    volumes:
+      - ./neo4j-data:/data
+    networks:
+      - graph-network
+
+  # --- 2. Spark Master ---
+  spark-master:
+    image: apache/spark:3.5.3
+    container_name: mon-spark-master
+    hostname: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    environment:
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
+    networks:
+      - graph-network
+
+  # --- 3. Spark Worker ---
+  spark-worker:
+    image: apache/spark:3.5.3
+    container_name: mon-spark-worker
+    hostname: spark-worker
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_MASTER=spark://spark-master:7077
+    networks:
+      - graph-network
+
+  # --- 4. Zeppelin ---
+  zeppelin:
+    image: apache/zeppelin:0.10.1
+    container_name: mon-zeppelin
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./zeppelin-notebooks:/opt/zeppelin/notebook
+      - ./data:/data
+    environment:
+      - ZEPPELIN_ADDR=0.0.0.0
+      - SPARK_HOME=/opt/spark
+      - MASTER=spark://mon-spark-master:7077
+    depends_on:
+      - spark-master
+    networks:
+      - graph-network
+
+  # --- 5. Giraph + Hadoop moderne ---
+  mon-giraph:
+    image: big-data-europe/hadoop-namenode:latest
+    container_name: mon-giraph
+    hostname: hadoop
+    ports:
+      - "9870:9870"
+      - "8088:8088"
+    environment:
+      - CLUSTER_NAME=giraph-cluster
+    volumes:
+      - ./data:/data
+      - hadoop-data:/hadoop/dfs/data   # volume déclaré ci-dessous
+    command: >
+      bash -c "
+        /usr/local/hadoop/bin/hdfs namenode -format giraph-cluster || true &&
+        /usr/local/hadoop/sbin/start-dfs.sh &&
+        /usr/local/hadoop/sbin/start-yarn.sh &&
+        tail -f /usr/local/hadoop/logs/*.log
+      "
+    networks:
+      - graph-network
+
+# Déclaration des volumes persistants
+volumes:
+  neo4j-data:
+  hadoop-data:
+
+networks:
+  graph-network:
+    driver: bridge
