@@ -20,12 +20,69 @@ Le projet inclut également une chaîne de traitement moderne utilisant **Neo4j*
 
 ---
 
-## 🏗️ Architecture
+# Architecture du Projet
 
-Le projet se divise en deux workflows distincts :
+L’architecture est divisée en deux workflows principaux, tous deux conteneurisés via **Docker** afin de garantir une exécution locale reproductible.
 
-1.  **Workflow Moderne :** Neo4j (Stockage) ➔ Spark GraphX (Traitement) ➔ Zeppelin (Visualisation).
-2.  **Workflow Hadoop :** HDFS (Stockage) ➔ Apache Giraph (Traitement BSP).
+---
+
+## Workflow 1 : Neo4j + Spark GraphX + Zeppelin
+
+### Stockage
+- **Neo4j** comme base de données de graphes native (NoSQL).
+- Utilisation de **Cypher** pour les opérations CRUD et les traversées de graphes.
+
+### Traitement analytique
+- **Spark GraphX** pour :
+  - Charger le graphe depuis Neo4j.
+  - Le transformer en **RDD**.
+  - Exécuter des algorithmes itératifs tels que **PageRank**, **Connected Components** et **Triangle Count**.
+
+### Interface
+- **Apache Zeppelin** pour :
+  - Créer des notebooks interactifs.
+  - Configurer les dépendances.
+  - Charger et explorer les données (ex. : distribution des degrés).
+  - Visualiser les résultats analytiques.
+
+### Étapes clés
+- Mise en place de **Docker Compose** (services : Neo4j, Spark Master, Spark Worker, Zeppelin).
+- Import du dataset **Wiki-Vote** au format CSV dans Neo4j via Cypher.
+- Connexion de Spark à Neo4j pour charger le graphe en **DataFrame/RDD**.
+- Analyse exploratoire et exécution des algorithmes avec **benchmarking**.
+
+---
+
+## Workflow 2 : Hadoop + Apache Giraph
+
+### Infrastructure
+- **Cluster Hadoop** avec **HDFS** pour le stockage distribué.
+
+### Traitement
+- **Apache Giraph** pour l’exécution itérative de **PageRank** en mode *vertex-centric* (implémentation en Java).
+
+### Étapes clés
+- Intégration d’un cluster **Hadoop + Giraph** dans Docker.
+- Export du graphe **Wiki-Vote** vers **HDFS** au format texte (liste d’arêtes).
+- Exécution du job PageRank avec une configuration spécifique (supersteps, métriques).
+- Analyse des résultats (logs, timers, compteurs MapReduce).
+- Visualisation interactive des résultats via **Zeppelin**.
+
+---
+
+## Réseau et conteneurisation
+- Interconnexion de tous les services via un réseau Docker dédié (**graph-network**).
+- Utilisation de volumes persistants pour les données (ex. : `./neo4j-data:/data`).
+- Plugins Neo4j :
+  - **APOC**
+  - **Graph Data Science** pour des fonctionnalités avancées.
+
+---
+
+## Dataset
+- **Wiki-Vote** : graphe orienté représentant des votes sur Wikipedia.
+- Préparé au format **CSV**, importé dans **Neo4j**, puis exporté vers **HDFS** pour le traitement avec **Giraph**.
+
 
 ---
 
