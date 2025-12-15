@@ -2,124 +2,140 @@
 
 ![Big Data](https://img.shields.io/badge/Big%20Data-Project-blue) ![Docker](https://img.shields.io/badge/Docker-Compose-green) ![Spark](https://img.shields.io/badge/Apache-Spark%20GraphX-orange) ![Giraph](https://img.shields.io/badge/Apache-Giraph-red) ![Neo4j](https://img.shields.io/badge/Neo4j-GraphDB-lightgrey)
 
-Ce dépôt contient l'implémentation complète et le rapport d'un projet d'étude comparative entre deux frameworks majeurs de traitement de graphes distribués : **Apache Giraph** (modèle BSP) et **Apache Spark GraphX** (modèle RDD).
+Ce dépôt présente l’implémentation complète ainsi que le rapport d’un projet de **benchmark comparatif** entre deux frameworks majeurs de traitement distribué de graphes : **Apache Giraph** (modèle BSP, vertex-centric) et **Apache Spark GraphX** (modèle data-centric basé sur RDD).
 
-Le projet inclut également une chaîne de traitement moderne utilisant **Neo4j** pour le stockage et **Apache Zeppelin** pour l'analyse interactive, le tout orchestré via **Docker**.
+Le projet s’appuie sur une chaîne de traitement moderne intégrant **Neo4j** pour le stockage des graphes et **Apache Zeppelin** pour l’analyse interactive. L’ensemble de l’infrastructure est entièrement **conteneurisé avec Docker**, garantissant une exécution locale reproductible.
 
-## 📋 Objectifs
+---
 
-1.  Mettre en œuvre une architecture distribuée pour l'analyse de grands graphes.
-2.  Comparer les performances (temps d'exécution) de l'algorithme **PageRank**.
-3.  Analyser la cohésion du réseau via **Connected Components** et **Triangle Count**.
+## Objectifs
 
-## 🗂️ Dataset
+1. Concevoir et déployer une architecture distribuée pour l’analyse de graphes.
+2. Comparer les performances de l’algorithme **PageRank** sur Spark GraphX et Apache Giraph.
+3. Étudier la structure du graphe à l’aide des algorithmes **Connected Components** et **Triangle Count**.
 
-* **Source** : SNAP (Stanford Network Analysis Project)
-* **Nom** : [Wiki-Vote](https://snap.stanford.edu/data/wiki-Vote.html)
-* **Métriques** : 7 115 nœuds, 103 689 arêtes orientées.
+---
+
+## Dataset
+
+- **Source** : SNAP (Stanford Network Analysis Project)
+- **Nom** : [Wiki-Vote](https://snap.stanford.edu/data/wiki-Vote.html)
+- **Caractéristiques** : 7 115 nœuds et 103 689 arêtes orientées
 
 ---
 
 # Architecture du Projet
 
-L’architecture est divisée en deux workflows principaux, tous deux conteneurisés via **Docker** afin de garantir une exécution locale reproductible.
+L’architecture repose sur deux workflows distincts, chacun correspondant à une approche spécifique du traitement de graphes distribués. Les deux pipelines sont déployés via **Docker Compose** afin d’assurer cohérence et reproductibilité.
 
 ---
 
-## Workflow 1 : Neo4j + Spark GraphX + Zeppelin
+## Workflow 1 : Neo4j, Spark GraphX et Zeppelin
 
 ### Stockage
-- **Neo4j** comme base de données de graphes native (NoSQL).
-- Utilisation de **Cypher** pour les opérations CRUD et les traversées de graphes.
+- **Neo4j** est utilisé comme base de données de graphes native (NoSQL).
+- Les opérations de manipulation et de traversée du graphe sont réalisées via le langage **Cypher**.
 
 ### Traitement analytique
-- **Spark GraphX** pour :
-  - Charger le graphe depuis Neo4j.
-  - Le transformer en **RDD**.
+- **Spark GraphX** permet de :
+  - Charger les données depuis Neo4j.
+  - Convertir le graphe en **RDD**.
   - Exécuter des algorithmes itératifs tels que **PageRank**, **Connected Components** et **Triangle Count**.
 
-### Interface
-- **Apache Zeppelin** pour :
-  - Créer des notebooks interactifs.
-  - Configurer les dépendances.
-  - Charger et explorer les données (ex. : distribution des degrés).
-  - Visualiser les résultats analytiques.
+### Interface d’analyse
+- **Apache Zeppelin** est utilisé pour :
+  - La création de notebooks analytiques.
+  - La configuration dynamique des dépendances.
+  - L’analyse exploratoire (distribution des degrés, métriques globales).
+  - La visualisation des résultats.
 
-### Étapes clés
-- Mise en place de **Docker Compose** (services : Neo4j, Spark Master, Spark Worker, Zeppelin).
-- Import du dataset **Wiki-Vote** au format CSV dans Neo4j via Cypher.
-- Connexion de Spark à Neo4j pour charger le graphe en **DataFrame/RDD**.
-- Analyse exploratoire et exécution des algorithmes avec **benchmarking**.
+### Étapes principales
+- Déploiement des services via **Docker Compose** (Neo4j, Spark Master, Spark Worker, Zeppelin).
+- Import du dataset Wiki-Vote au format CSV dans Neo4j.
+- Connexion de Spark à Neo4j pour le chargement du graphe.
+- Analyse exploratoire et exécution des algorithmes avec mesure des performances.
 
 ---
 
-## Workflow 2 : Hadoop + Apache Giraph
+## Workflow 2 : Hadoop et Apache Giraph
 
 ### Infrastructure
-- **Cluster Hadoop** avec **HDFS** pour le stockage distribué.
+- Cluster **Hadoop** avec **HDFS** pour le stockage distribué.
 
 ### Traitement
-- **Apache Giraph** pour l’exécution itérative de **PageRank** en mode *vertex-centric* (implémentation en Java).
+- **Apache Giraph** est utilisé pour l’exécution de **PageRank** selon un modèle *vertex-centric*, implémenté en Java.
 
-### Étapes clés
-- Intégration d’un cluster **Hadoop + Giraph** dans Docker.
-- Export du graphe **Wiki-Vote** vers **HDFS** au format texte (liste d’arêtes).
-- Exécution du job PageRank avec une configuration spécifique (supersteps, métriques).
-- Analyse des résultats (logs, timers, compteurs MapReduce).
-- Visualisation interactive des résultats via **Zeppelin**.
+### Étapes principales
+- Déploiement d’un cluster Hadoop intégrant Giraph via Docker.
+- Export du graphe Wiki-Vote vers HDFS au format texte (liste d’arêtes).
+- Exécution du job PageRank avec des paramètres spécifiques (supersteps, métriques).
+- Analyse des résultats à partir des logs, compteurs MapReduce et temps d’exécution.
+- Visualisation des résultats via Zeppelin.
 
 ---
 
 ## Réseau et conteneurisation
-- Interconnexion de tous les services via un réseau Docker dédié (**graph-network**).
-- Utilisation de volumes persistants pour les données (ex. : `./neo4j-data:/data`).
-- Plugins Neo4j :
+
+- Tous les services communiquent via un réseau Docker dédié (**graph-network**).
+- Des volumes persistants sont utilisés pour conserver les données (ex. : `./neo4j-data:/data`).
+- Plugins Neo4j intégrés :
   - **APOC**
-  - **Graph Data Science** pour des fonctionnalités avancées.
+  - **Graph Data Science** pour les traitements avancés.
 
 ---
 
-## Dataset
-- **Wiki-Vote** : graphe orienté représentant des votes sur Wikipedia.
-- Préparé au format **CSV**, importé dans **Neo4j**, puis exporté vers **HDFS** pour le traitement avec **Giraph**.
+## Préparation du Dataset
 
+Le dataset **Wiki-Vote** est :
+- Importé dans **Neo4j** au format CSV pour les analyses avec Spark GraphX.
+- Exporté vers **HDFS** afin d’être traité par **Apache Giraph**.
 
 ---
+
 # Étude Comparative
 
 ## Performances
-- **Spark GraphX** est plus rapide et interactif pour des graphes de taille modeste.
-- **Apache Giraph** excelle en **scalabilité** pour des graphes très volumineux (jusqu’à des trillions d’arêtes).
-- Temps d’exécution de **PageRank** sur le dataset *Wiki-Vote* :
-  - Giraph : ~13,7 s (incluant l’overhead du cluster).
-  - Spark : baseline plus rapide pour ce cas d’usage.
+
+- **Spark GraphX** se distingue par sa rapidité et son interactivité sur des graphes de taille modérée.
+- **Apache Giraph** est mieux adapté aux graphes de très grande taille, offrant une meilleure scalabilité.
+- Résultats PageRank sur Wiki-Vote :
+  - Giraph : ~13,7 secondes (incluant l’overhead du cluster).
+  - Spark GraphX : temps inférieur pour ce volume de données.
 
 ## Modèles de programmation
-- **Data-centric** (Spark GraphX).
-- **Vertex-centric** (Giraph).
-- Spark offre une meilleure **expérience développeur**, notamment pour l’analyse exploratoire et le prototypage rapide.
+
+- **Spark GraphX** adopte une approche *data-centric*, facilitant l’analyse exploratoire.
+- **Apache Giraph** repose sur un modèle *vertex-centric*, plus proche des paradigmes BSP.
+- Spark offre globalement une meilleure productivité pour le développement et l’expérimentation.
 
 ## Synthèse
-Le choix de la technologie dépend du cas d’usage :
-- **Interactivité et analyse exploratoire** → Spark GraphX.
-- **Puissance brute et très grande échelle** → Apache Giraph.
+
+Le choix de la solution dépend du contexte :
+- **Analyse interactive et prototypage rapide** : Spark GraphX.
+- **Traitement massif à grande échelle** : Apache Giraph.
 
 ---
 
 # Perspectives
 
-- Extension à des **datasets de plus grande taille**.
-- Intégration d’**autres algorithmes** de graphes (ex. : *Community Detection*).
-- Déploiement sur un **cluster cloud** afin d’évaluer la scalabilité réelle.
+- Passage à des **datasets de plus grande dimension**.
+- Intégration d’algorithmes supplémentaires (ex. : *Community Detection*).
+- Déploiement sur un **cluster cloud** pour évaluer la scalabilité en conditions réelles.
 
+---
 
-## 🚀 Installation et Démarrage
+## Installation et Démarrage
 
 ### Prérequis
-* Docker & Docker Compose installés sur la machine.
-* 4 Go de RAM minimum alloués à Docker.
+- Docker et Docker Compose installés.
+- Au minimum 4 Go de RAM alloués à Docker.
+  
+---
 
-### 1. Cloner le dépôt
+  Ce projet a été réalisé **en collaboration avec [ayoubharati](https://github.com/ayoubharati) et [aziz-mohammed](https://github.com/aziz-mohammed)**.
+
+
+### Clonage du dépôt
 ```bash
-git clone [https://github.com/miskaraminaa/benchmark-giraph-vs-graphx.git](https://github.com/miskaraminaa/benchmark-giraph-vs-graphx.git)
+git clone https://github.com/miskaraminaa/benchmark-giraph-vs-graphx.git
 cd benchmark-giraph-vs-graphx
