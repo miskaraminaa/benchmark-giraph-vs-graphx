@@ -85,6 +85,33 @@ L’architecture est divisée en deux workflows principaux, tous deux conteneuri
 
 
 ---
+# Étude Comparative
+
+## Performances
+- **Spark GraphX** est plus rapide et interactif pour des graphes de taille modeste.
+- **Apache Giraph** excelle en **scalabilité** pour des graphes très volumineux (jusqu’à des trillions d’arêtes).
+- Temps d’exécution de **PageRank** sur le dataset *Wiki-Vote* :
+  - Giraph : ~13,7 s (incluant l’overhead du cluster).
+  - Spark : baseline plus rapide pour ce cas d’usage.
+
+## Modèles de programmation
+- **Data-centric** (Spark GraphX).
+- **Vertex-centric** (Giraph).
+- Spark offre une meilleure **expérience développeur**, notamment pour l’analyse exploratoire et le prototypage rapide.
+
+## Synthèse
+Le choix de la technologie dépend du cas d’usage :
+- **Interactivité et analyse exploratoire** → Spark GraphX.
+- **Puissance brute et très grande échelle** → Apache Giraph.
+
+---
+
+# Perspectives
+
+- Extension à des **datasets de plus grande taille**.
+- Intégration d’**autres algorithmes** de graphes (ex. : *Community Detection*).
+- Déploiement sur un **cluster cloud** afin d’évaluer la scalabilité réelle.
+
 
 ## 🚀 Installation et Démarrage
 
