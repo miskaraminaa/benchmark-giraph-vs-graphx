@@ -65,29 +65,6 @@ services:
     networks:
       - graph-network
 
-  # --- 5. Giraph + Hadoop moderne ---
-  mon-giraph:
-    image: big-data-europe/hadoop-namenode:latest
-    container_name: mon-giraph
-    hostname: hadoop
-    ports:
-      - "9870:9870"
-      - "8088:8088"
-    environment:
-      - CLUSTER_NAME=giraph-cluster
-    volumes:
-      - ./data:/data
-      - hadoop-data:/hadoop/dfs/data   # volume déclaré ci-dessous
-    command: >
-      bash -c "
-        /usr/local/hadoop/bin/hdfs namenode -format giraph-cluster || true &&
-        /usr/local/hadoop/sbin/start-dfs.sh &&
-        /usr/local/hadoop/sbin/start-yarn.sh &&
-        tail -f /usr/local/hadoop/logs/*.log
-      "
-    networks:
-      - graph-network
-
 # Déclaration des volumes persistants
 volumes:
   neo4j-data:
